@@ -14,22 +14,6 @@ public class Article {
 		sourceId = source.get("id");
 	}
 
-	public String getSourceName() {
-		return sourceName;
-	}
-
-	public void setSourceName(String sourceName) {
-		this.sourceName = sourceName;
-	}
-
-	public String getSourceId() {
-		return sourceId;
-	}
-
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
-
 	@JsonProperty("title")
 	private String title;
 
@@ -50,6 +34,18 @@ public class Article {
 
 	@JsonProperty("urlToImage")
 	private String urlToImage;
+
+	private int weight;
+	
+	
+	
+	public Integer getWeight() {
+		return weight;
+	}
+
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
 
 	public String getUrlToImage() {
 		return urlToImage;
@@ -114,12 +110,29 @@ public class Article {
 	public void setPublishedAt(String publishedAt) {
 		this.publishedAt = publishedAt;
 	}
+	
+	public String getSourceName() {
+		return sourceName;
+	}
+
+	public void setSourceName(String sourceName) {
+		this.sourceName = sourceName;
+	}
+
+	public String getSourceId() {
+		return sourceId;
+	}
+
+	public void setSourceId(String sourceId) {
+		this.sourceId = sourceId;
+	}
 
 	@Override
 	public String toString() {
-		return "Article [source=" + sourceName + ", title=" + title + ", author=" + author + ", description="
-				+ description + ", url=" + url + ", content=" + content + ", publishedAt=" + publishedAt
-				+ ", urlToImage=" + urlToImage + "]";
+		return "Article [sourceName=" + sourceName + ", sourceId=" + sourceId + ", title=" + title + ", author="
+				+ author + ", description=" + description + ", url=" + url + ", content=" + content + ", publishedAt="
+				+ publishedAt + ", urlToImage=" + urlToImage + ", weight=" + weight + "]";
 	}
+
 
 }
