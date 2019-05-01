@@ -67,9 +67,9 @@ public class NewsServiceImpl {
 	}
 
 	public List<Article> getSmartNews() {
-		List<Article> latestArticles = doRestCall("https://newsapi.org/v2/top-headlines?language=en&apiKey=d7ae5b652f4d481d8cb7ded898d9d43f");
+		List<Article> latestArticles = doRestCall("https://newsapi.org/v2/top-headlines?language=en&apiKey=d7ae5b652f4d481d8cb7ded898d9d43f&e");
 		for (Article article : latestArticles) {
-			if(technologySources.contains(article.getSourceName()) || technologySources.contains(article.getSourceId())) {
+			if(technologySources.toLowerCase().contains(article.getSourceName().toLowerCase()) || technologySources.toLowerCase().contains(article.getSourceId().toLowerCase())) {
 				article.setWeight(article.getWeight()+1);
 				System.out.println(article.getSource());
 			}
