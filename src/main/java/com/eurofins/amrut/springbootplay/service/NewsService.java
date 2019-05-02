@@ -75,6 +75,6 @@ public class NewsService {
 	@RequestMapping(value = "/news/smartFeed")
 	@ResponseBody
 	public List<Article> getSmartNews() {
-		return newsServiceImpl.getSmartNews();
+		return newsServiceImpl.getSmartNews("");
 	}
 }
