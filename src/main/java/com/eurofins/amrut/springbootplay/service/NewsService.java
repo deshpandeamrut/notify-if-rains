@@ -45,7 +45,11 @@ public class NewsService {
 	@RequestMapping(value = "/news/search/{searchText}")
 	@ResponseBody
 	public List<Article> getLatestNewsForSearchText(@PathVariable String searchText) {
-		return newsServiceImpl.getNewsFromSource(searchText);
+		List<Article> temp = newsServiceImpl.getLatestNewsForSearchText(searchText);
+		if(temp.isEmpty()) {
+			temp = newsServiceImpl.getAllNewsForSearchText(searchText); 
+		}
+		return temp;
 	}
 
 	@RequestMapping(value = "/news/all/search/{searchText}")
