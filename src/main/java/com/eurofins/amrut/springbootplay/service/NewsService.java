@@ -62,7 +62,7 @@ public class NewsService {
 
 	@RequestMapping(value = "/news/myFeed")
 	@ResponseBody
-	public List<Article> getLatestFeed() {
+	public Map<String,List<Article>> getLatestFeed() {
 		return newsServiceImpl.getLatestFeed();
 	}
 
@@ -76,5 +76,11 @@ public class NewsService {
 	@ResponseBody
 	public List<Article> getSmartNews() {
 		return newsServiceImpl.getSmartNews("");
+	}
+	
+	@RequestMapping(value = "/news/mySources")
+	@ResponseBody
+	public Map<String,List<Article>> getMySourcesNews() {
+		return newsServiceImpl.getMySourcesNews();
 	}
 }

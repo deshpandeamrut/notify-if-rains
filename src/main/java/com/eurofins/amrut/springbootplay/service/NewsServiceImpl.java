@@ -85,7 +85,7 @@ public class NewsServiceImpl {
 	}
 
 	public List<Article> getSmartNews(String url) {
-		
+
 		Date now = new Date();
 		long nowMs = now.getTime();
 		List<Article> latestArticles;
@@ -119,9 +119,9 @@ public class NewsServiceImpl {
 			String sourceUrl = article.getUrl();
 			for (String source : sources) {
 				System.out.println(source);
-				if ((sourceName!=null && sourceName.toLowerCase().contains(source))
-						|| (sourceId!=null && sourceId.toLowerCase().contains(source)) 
-						|| (sourceUrl!=null && sourceUrl.contains(source))) {
+				if ((sourceName != null && sourceName.toLowerCase().contains(source))
+						|| (sourceId != null && sourceId.toLowerCase().contains(source))
+						|| (sourceUrl != null && sourceUrl.contains(source))) {
 					article.setWeight(article.getWeight() + 1);
 				}
 			}
@@ -131,9 +131,9 @@ public class NewsServiceImpl {
 				}
 			}
 			for (String source : newsNegateSourceList) {
-				if ((sourceName!=null && sourceName.toLowerCase().contains(source))
-						|| (sourceId!=null && sourceId.toLowerCase().contains(source)) 
-						|| (sourceUrl!=null && sourceUrl.contains(source))) {
+				if ((sourceName != null && sourceName.toLowerCase().contains(source))
+						|| (sourceId != null && sourceId.toLowerCase().contains(source))
+						|| (sourceUrl != null && sourceUrl.contains(source))) {
 					article.setWeight(article.getWeight() - 1);
 				}
 			}
@@ -213,24 +213,29 @@ public class NewsServiceImpl {
 
 	@RequestMapping(value = "/news/myFeed")
 	@ResponseBody
-	public List<Article> getLatestFeed() {
-		Date now = new Date();
-		long nowMs = now.getTime();
+	public Map<String, List<Article>> getLatestFeed() {
+		Map<String, List<Article>> myFeedMap = new HashMap<String, List<Article>>();
 		final String uri = "https://newsapi.org/v2/top-headlines?language=en&country=us&apiKey=d7ae5b652f4d481d8cb7ded898d9d43f";
-		if (cache.get("myFeed") == null || (lastRefreshTime - nowMs) > refreshInterval) {
-			List<Article> myFeed = new ArrayList<>();
-			for (String category : userCategories.split(",")) {
-				List<Article> temp = getNewsForCategory(category.split(":")[1], false);
-				if (!temp.isEmpty())
-					myFeed.add(temp.get(0));
-			}
-			cache.put("myFeed", myFeed);
-			Date lastRefreshTimedate = new Date();
-			lastRefreshTimedate.setTime(lastRefreshTime);
-			System.out.println("Last refresh time: " + lastRefreshTimedate);
-			lastRefreshTime = nowMs;
+		for (String category : userCategories.split(",")) {
+			List<Article> temp = getNewsForCategory(category.split(":")[1], false);
+			myFeedMap.put(category.split(":")[1], temp);
 		}
-		return cache.get("myFeed");
+		return myFeedMap;
 
+	}
+
+	public Map<String,List<Article>> getMySourcesNews() {
+		Map<String, List<Article>> myFeedMap = new HashMap<String, List<Article>>();
+		List<String> sourceList = new ArrayList<>();
+		sourceList.addAll(generalSourceList);
+		sourceList.addAll(technologySourceList);
+		sourceList.addAll(sportsSourceList);
+		for (String source : sourceList) {
+			List<Article> temp = getNewsFromSource(source);
+			if(!temp.isEmpty()) {
+				myFeedMap.put(source, temp);
+			}
+		}
+		return myFeedMap;
 	}
 }
