@@ -4,8 +4,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.dashlines</groupId>
-	<artifactId>dashlines-news-app</artifactId>
+	<groupId>com.amrut</groupId>
+	<artifactId>notify-if-rains</artifactId>
 	<version>0.1.0</version>
 
 	<parent>
@@ -19,26 +19,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.data</groupId>
-			<artifactId>spring-data-redis</artifactId>
-			<version>2.0.3.RELEASE</version>
-		</dependency>
-
-		<dependency>
-			<groupId>net.thegreshams</groupId>
-			<artifactId>firebase4j</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
-
-		<dependency>
-			<groupId>redis.clients</groupId>
-			<artifactId>jedis</artifactId>
-			<version>2.9.0</version>
-			<type>jar</type>
-		</dependency>
 	</dependencies>
-
 	<properties>
 		<java.version>1.8</java.version>
 	</properties>
@@ -55,7 +36,7 @@
 							<goal>repackage</goal>
 						</goals>
 						<configuration>
-							<mainClass>com.eurofins.amrut.springbootplay.SpringBootPlayApplication</mainClass>
+							<mainClass>com.amrut.springbootplay.SpringBootPlayApplication</mainClass>
 						</configuration>
 					</execution>
 				</executions>
