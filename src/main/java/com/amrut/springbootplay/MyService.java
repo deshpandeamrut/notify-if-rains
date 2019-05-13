@@ -1,4 +1,4 @@
-package com.eurofins.amrut.springbootplay;
+package com.amrut.springbootplay;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;

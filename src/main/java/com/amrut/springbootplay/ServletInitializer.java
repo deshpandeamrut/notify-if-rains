@@ -1,4 +1,4 @@
-package com.eurofins.amrut.springbootplay;
+package com.amrut.springbootplay;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
