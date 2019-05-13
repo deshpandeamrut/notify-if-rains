@@ -12,6 +12,9 @@ import org.springframework.web.client.RestTemplate;
 import com.amrut.springbootplay.entity.AccuWeatherForecasts;
 import com.amrut.springbootplay.entity.AccuWeatherHeadline;
 import com.amrut.springbootplay.entity.AccuWeatherResponse;
+import com.amrut.springbootplay.entity.DarkySkyApiResponse;
+import com.amrut.springbootplay.entity.DarkySkyApiWeek;
+import com.amrut.springbootplay.entity.PredictionResponse;
 
 @Component
 public class WeatherServiceImpl {
@@ -29,20 +32,23 @@ public class WeatherServiceImpl {
 
 	@Value("${both.rain.msg}")
 	private String bothRainMsg;
-	
+
 	@Value("${one.signal.app.id}")
 	private String oneSignalAppId;
-	
+
 	@Value("${one.signal.app.key}")
 	private String oneSignalAppKey;
-	
+
 	@Value("${push.notification.title}")
 	private String pushNotificationTitle;
 
 	@Value("${ignore.push.notification.word}")
 	private String ignoreWord;
-	
-	private AccuWeatherResponse doRestCall(String uri) {
+
+	@Value("${darksky.api.url}")
+	private String darkSkyUrl;
+
+	private AccuWeatherResponse doAccuRestCall(String uri) {
 		System.out.println("Doing rest call... for " + uri);
 		RestTemplate restTemplate = new RestTemplate();
 		AccuWeatherResponse result = restTemplate.getForObject(uri, AccuWeatherResponse.class);
@@ -50,9 +56,21 @@ public class WeatherServiceImpl {
 
 	}
 
-	public AccuWeatherResponse getForecast() {
-		return doRestCall(
+	private DarkySkyApiResponse doDarkySkyRestCall(String uri) {
+		System.out.println("Doing rest call... for " + uri);
+		RestTemplate restTemplate = new RestTemplate();
+		DarkySkyApiResponse result = restTemplate.getForObject(uri, DarkySkyApiResponse.class);
+		return result;
+
+	}
+
+	public AccuWeatherResponse getAccuForecast() {
+		return doAccuRestCall(
 				"http://dataservice.accuweather.com/forecasts/v1/daily/1day/204108?apikey=5kv7fq5hi6seWxB2u74G7g8Brv0ocA6N");
+	}
+
+	public DarkySkyApiResponse getDarkSkyForecast() {
+		return doDarkySkyRestCall(darkSkyUrl);
 	}
 
 	private boolean checkIfItRains(AccuWeatherResponse accuWeatherResponse) {
@@ -84,31 +102,59 @@ public class WeatherServiceImpl {
 		return when;
 	}
 
-	public String predictRain() {
-		String message = "NA";
-		AccuWeatherResponse accuWeatherResponse = getForecast();
+	private boolean checkIfItRains(DarkySkyApiResponse darkySkyApiResponse) {
+		DarkySkyApiWeek todaysData = darkySkyApiResponse.getDarkySkyApiDaily().getWeekData().get(0);
+		boolean raining = false;
+		String summary = todaysData.getSummary();
+		if (summary != null) {
+			if (summary.toLowerCase().contains("rain")) {
+				raining = true;
+			}
+		}
+		return raining;
+	}
+
+	public PredictionResponse predictRain() {
+		PredictionResponse predictionResponse = new PredictionResponse();
+		AccuWeatherResponse accuWeatherResponse = getAccuForecast();
 		if (checkIfItRains(accuWeatherResponse)) {
 			String when = checkWhenItRains(accuWeatherResponse);
 			if (when.equals("day")) {
-				return dayRainMsg;
+				predictionResponse.setMessage(dayRainMsg);
 			} else if (when.equals("night")) {
-				return nightRainMsg;
+				predictionResponse.setMessage(nightRainMsg);
 			} else if (when.equals("both")) {
-				return bothRainMsg;
+				predictionResponse.setMessage(bothRainMsg);
+			}
+			predictionResponse.setActualMessage(accuWeatherResponse.getHeadline().getText());
+		}
+		/**
+		 * Check with DarkSky API
+		 */
+		if (predictionResponse.getMessage() != "NA") {
+			predictionResponse.setSource("ACCU");
+			return predictionResponse;
+		} else {
+			DarkySkyApiResponse darkySkyApiResponse = getDarkSkyForecast();
+			if (checkIfItRains(darkySkyApiResponse)) {
+				predictionResponse.setMessage(bothRainMsg);
+				predictionResponse.setActualMessage(darkySkyApiResponse.getDarkySkyApiDaily().getWeekData().get(0).getSummary());
+				predictionResponse.setSource("DarkSky");
 			}
 		}
-		return message;
+		return predictionResponse;
+
 	}
 
 	public String sendPushNotification() {
 		try {
-			String message = predictRain();
-			System.out.println(message);
-			if(message.equalsIgnoreCase(ignoreWord)) {
+			PredictionResponse predictionResponse = predictRain();
+			System.out.println(predictionResponse);
+			if (predictionResponse.getMessage().equalsIgnoreCase(ignoreWord)) {
 				return "No Rain Notifications!";
 			}
 			String jsonResponse;
-			
+
 			URL url = new URL("https://onesignal.com/api/v1/notifications");
 			HttpURLConnection con = (HttpURLConnection) url.openConnection();
 			con.setUseCaches(false);
@@ -116,12 +162,13 @@ public class WeatherServiceImpl {
 			con.setDoInput(true);
 
 			con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-			con.setRequestProperty("Authorization", "Basic "+ oneSignalAppKey);
+			con.setRequestProperty("Authorization", "Basic " + oneSignalAppKey);
 			con.setRequestMethod("POST");
 
-			String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\","
-					+ "\"included_segments\": [\"All\"]," + "\"data\": {\"foo\": \"bar\"},"
-					+ "\"contents\": {\"en\": \"" + message + "\"}" + "}";
+			String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\"," + "\"included_segments\": [\"All\"],"
+					+ "\"data\": {\"headings\": \"bar\"}," + "\"contents\": {\"en\": \""
+					+ predictionResponse.getActualMessage() + "\n" + "<<" + predictionResponse.getSource() + ">>"
+					+ "\"}," + "\"headings\": {\"en\": \"" + predictionResponse.getMessage() + "\"}" + "}";
 
 			System.out.println("strJsonBody:\n" + strJsonBody);
 

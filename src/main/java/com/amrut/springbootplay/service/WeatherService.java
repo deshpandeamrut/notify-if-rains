@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.amrut.springbootplay.entity.AccuWeatherResponse;
+import com.amrut.springbootplay.entity.DarkySkyApiResponse;
+import com.amrut.springbootplay.entity.PredictionResponse;
 
 
 @RestController
@@ -14,15 +16,21 @@ public class WeatherService {
 	@Autowired
 	WeatherServiceImpl weatherServiceImpl;
 	
-	@RequestMapping(value = "/weather/forecast")
+	@RequestMapping(value = "/weather/forecast/accu")
 	@ResponseBody
 	public AccuWeatherResponse getForecast() {
-		return weatherServiceImpl.getForecast();
+		return weatherServiceImpl.getAccuForecast();
+	}
+	
+	@RequestMapping(value = "/weather/forecast/darksky")
+	@ResponseBody
+	public DarkySkyApiResponse getdarkSkyForecast() {
+		return weatherServiceImpl.getDarkSkyForecast();
 	}
 	
 	@RequestMapping(value = "/weather/predict")
 	@ResponseBody
-	public String predict() {
+	public PredictionResponse predict() {
 		return weatherServiceImpl.predictRain();
 	}
 	
