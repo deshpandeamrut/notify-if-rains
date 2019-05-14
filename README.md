@@ -26,7 +26,14 @@ https://accuweather.com  <br/>
 https://darksky.net/
 
 
-
+##Deployment
+Currently deployed in **Heroku** at http://notify-if-rains.herokuapp.com/
+Following are the services supported
+<ol>
+  <li>GET /weather/forecast/accu</li>  
+  <li>GET /weather/forecast/darksky</li>  
+  <li>GET /weather/predict</li>
+</ol>
 
 ## How to use?
 Visit <br/>
