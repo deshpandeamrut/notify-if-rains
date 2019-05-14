@@ -40,6 +40,7 @@ public class PredictionResponse {
 		super();
 		this.message = "NA";
 		this.source = "";
+		this.actualMessage = "";
 	}
 
 	@Override

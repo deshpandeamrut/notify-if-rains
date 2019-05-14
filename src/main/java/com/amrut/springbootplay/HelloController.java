@@ -8,7 +8,7 @@ public class HelloController {
     
     @RequestMapping("/")
     public String index() {
-        return "Greetings from Spring Boot!";
+        return "Application that alerts with push notifications to sunscribed users about rain forecast for the day.";
     }
     
 }
