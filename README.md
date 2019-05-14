@@ -18,7 +18,7 @@ Drenched myslef on the way back to home and was waiting for rain to stop, which 
 
 
 ## Installation
--Clone the repo
+-Clone the repo <br/>
 -Run the app locally with **mvn spring-boot:run**
 
 ## API Reference
