@@ -12,6 +12,7 @@ import org.springframework.web.client.RestTemplate;
 import com.amrut.springbootplay.entity.AccuWeatherForecasts;
 import com.amrut.springbootplay.entity.AccuWeatherHeadline;
 import com.amrut.springbootplay.entity.AccuWeatherResponse;
+import com.amrut.springbootplay.entity.CurrentForecast;
 import com.amrut.springbootplay.entity.DarkySkyApiResponse;
 import com.amrut.springbootplay.entity.DarkySkyApiWeek;
 import com.amrut.springbootplay.entity.PredictionResponse;
@@ -138,7 +139,8 @@ public class WeatherServiceImpl {
 			DarkySkyApiResponse darkySkyApiResponse = getDarkSkyForecast();
 			if (checkIfItRains(darkySkyApiResponse)) {
 				predictionResponse.setMessage(bothRainMsg);
-				predictionResponse.setActualMessage(darkySkyApiResponse.getDarkySkyApiDaily().getWeekData().get(0).getSummary());
+				predictionResponse
+						.setActualMessage(darkySkyApiResponse.getDarkySkyApiDaily().getWeekData().get(0).getSummary());
 				predictionResponse.setSource("DarkSky");
 			}
 		}
@@ -147,12 +149,22 @@ public class WeatherServiceImpl {
 	}
 
 	public String sendPushNotification() {
+		PredictionResponse predictionResponse = predictRain();
+		System.out.println(predictionResponse);
+		if (predictionResponse.getMessage().equalsIgnoreCase(ignoreWord)) {
+			return "No Rain Notifications!";
+		}
+
+		String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\"," + "\"included_segments\": [\"All\"],"
+				+ "\"data\": {\"headings\": \"bar\"}," + "\"contents\": {\"en\": \""
+				+ predictionResponse.getActualMessage() + "\n" + "<<" + predictionResponse.getSource() + ">>" + "\"},"
+				+ "\"headings\": {\"en\": \"" + predictionResponse.getMessage() + "\"}" + "}";
+
+		return pushNotification(strJsonBody);
+	}
+
+	private String pushNotification(String strJsonBody) {
 		try {
-			PredictionResponse predictionResponse = predictRain();
-			System.out.println(predictionResponse);
-			if (predictionResponse.getMessage().equalsIgnoreCase(ignoreWord)) {
-				return "No Rain Notifications!";
-			}
 			String jsonResponse;
 
 			URL url = new URL("https://onesignal.com/api/v1/notifications");
@@ -164,13 +176,6 @@ public class WeatherServiceImpl {
 			con.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 			con.setRequestProperty("Authorization", "Basic " + oneSignalAppKey);
 			con.setRequestMethod("POST");
-
-			String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\"," + "\"included_segments\": [\"All\"],"
-					+ "\"data\": {\"headings\": \"bar\"}," + "\"contents\": {\"en\": \""
-					+ predictionResponse.getActualMessage() + "\n" + "<<" + predictionResponse.getSource() + ">>"
-					+ "\"}," + "\"headings\": {\"en\": \"" + predictionResponse.getMessage() + "\"}" + "}";
-
-			System.out.println("strJsonBody:\n" + strJsonBody);
 
 			byte[] sendBytes = strJsonBody.getBytes("UTF-8");
 			con.setFixedLengthStreamingMode(sendBytes.length);
@@ -196,5 +201,22 @@ public class WeatherServiceImpl {
 			t.printStackTrace();
 		}
 		return "Error while sending";
+	}
+
+	public String sendTodaysForecast() {
+		DarkySkyApiResponse darkySkyApiResponse = getDarkSkyForecast();
+		CurrentForecast currentForecast = new CurrentForecast();
+		currentForecast.setCurrentSummary(darkySkyApiResponse.getDarkySkyApiCurrently().getSummary());
+		currentForecast.setDaySummary(darkySkyApiResponse.getDarkySkyApiHourly().getSummary());
+		currentForecast.setWeekSummary(darkySkyApiResponse.getDarkySkyApiDaily().getSummary());
+		
+		String notificationContent = "Currently " + currentForecast.getCurrentSummary() + ", " + currentForecast.getDaySummary();
+		
+		String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\"," + "\"included_segments\": [\"All\"],"
+				+ "\"data\": {\"headings\": \"bar\"}," + "\"contents\": {\"en\": \""
+				+ notificationContent + "\n" + "\"},"
+				+ "\"headings\": {\"en\": \"  Today's Summary  \"}" + "}";
+		
+		return pushNotification(strJsonBody);
 	}
 }

@@ -39,4 +39,10 @@ public class WeatherService {
 	public String sendPushNotification() {
 		return weatherServiceImpl.sendPushNotification();
 	}
+	
+	@RequestMapping(value = "/weather/sendTodaysForecast")
+	@ResponseBody
+	public String sendTodaysForecast() {
+		return weatherServiceImpl.sendTodaysForecast();
+	}
 }
