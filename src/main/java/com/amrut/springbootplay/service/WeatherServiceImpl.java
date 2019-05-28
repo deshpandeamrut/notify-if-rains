@@ -127,30 +127,27 @@ public class WeatherServiceImpl {
 			} else if (when.equals("both")) {
 				predictionResponse.setMessage(bothRainMsg);
 			}
+			predictionResponse.setSource("ACCU");
 			predictionResponse.setActualMessage(accuWeatherResponse.getHeadline().getText());
 		}
 		/**
 		 * Check with DarkSky API
 		 */
-		if (predictionResponse.getMessage() != "NA") {
-			predictionResponse.setSource("ACCU");
-			return predictionResponse;
-		} else {
 			DarkySkyApiResponse darkySkyApiResponse = getDarkSkyForecast();
 			if (checkIfItRains(darkySkyApiResponse)) {
 				predictionResponse.setMessage(bothRainMsg);
 				predictionResponse
 						.setActualMessage(darkySkyApiResponse.getDarkySkyApiDaily().getWeekData().get(0).getSummary());
-				predictionResponse.setSource("DarkSky");
+				if(predictionResponse.getMessage().equals("NA")) {
+					predictionResponse.setSource("DARK SKY");
+				}
+				predictionResponse.setSource("ALL SOURCES");
 			}
-		}
 		return predictionResponse;
-
 	}
 
 	public String sendPushNotification() {
 		PredictionResponse predictionResponse = predictRain();
-		System.out.println(predictionResponse);
 		if (predictionResponse.getMessage().equalsIgnoreCase(ignoreWord)) {
 			return "No Rain Notifications!";
 		}
