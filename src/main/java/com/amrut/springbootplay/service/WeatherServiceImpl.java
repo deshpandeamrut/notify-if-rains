@@ -133,16 +133,17 @@ public class WeatherServiceImpl {
 		/**
 		 * Check with DarkSky API
 		 */
-			DarkySkyApiResponse darkySkyApiResponse = getDarkSkyForecast();
-			if (checkIfItRains(darkySkyApiResponse)) {
-				predictionResponse.setMessage(bothRainMsg);
-				predictionResponse
-						.setActualMessage(darkySkyApiResponse.getDarkySkyApiDaily().getWeekData().get(0).getSummary());
-				if(predictionResponse.getMessage().equals("NA")) {
-					predictionResponse.setSource("DARK SKY");
-				}
+		DarkySkyApiResponse darkySkyApiResponse = getDarkSkyForecast();
+		if (checkIfItRains(darkySkyApiResponse)) {
+			predictionResponse.setMessage(bothRainMsg);
+			predictionResponse
+					.setActualMessage(darkySkyApiResponse.getDarkySkyApiDaily().getWeekData().get(0).getSummary());
+			if (predictionResponse.getSource().equals("")) {
+				predictionResponse.setSource("DARK SKY");
+			} else {
 				predictionResponse.setSource("ALL SOURCES");
 			}
+		}
 		return predictionResponse;
 	}
 
@@ -206,14 +207,14 @@ public class WeatherServiceImpl {
 		currentForecast.setCurrentSummary(darkySkyApiResponse.getDarkySkyApiCurrently().getSummary());
 		currentForecast.setDaySummary(darkySkyApiResponse.getDarkySkyApiHourly().getSummary());
 		currentForecast.setWeekSummary(darkySkyApiResponse.getDarkySkyApiDaily().getSummary());
-		
-		String notificationContent = "Currently " + currentForecast.getCurrentSummary() + ", " + currentForecast.getDaySummary();
-		
+
+		String notificationContent = "Currently " + currentForecast.getCurrentSummary() + ", "
+				+ currentForecast.getDaySummary();
+
 		String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\"," + "\"included_segments\": [\"All\"],"
-				+ "\"data\": {\"headings\": \"bar\"}," + "\"contents\": {\"en\": \""
-				+ notificationContent + "\n" + "\"},"
-				+ "\"headings\": {\"en\": \"  Today's Summary  \"}" + "}";
-		
+				+ "\"data\": {\"headings\": \"bar\"}," + "\"contents\": {\"en\": \"" + notificationContent + "\n"
+				+ "\"}," + "\"headings\": {\"en\": \"  Today's Summary  \"}" + "}";
+
 		return pushNotification(strJsonBody);
 	}
 }
