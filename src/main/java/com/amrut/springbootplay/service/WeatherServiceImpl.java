@@ -208,8 +208,9 @@ public class WeatherServiceImpl {
 		if (predictionResponse.getMessage().equalsIgnoreCase(ignoreWord)) {
 			return "No Rain Notifications!";
 		}
-
-		String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\"," + "\"included_segments\": [\"All\"],"
+//		chrome_web_icon
+		String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\"," + 
+				"\"chrome_web_icon\": \"" + "http://nammabagalkot.in/notifyifrains/51804.png" + "\","+ "\"included_segments\": [\"All\"],"
 				+ "\"data\": {\"headings\": \"bar\"}," + "\"contents\": {\"en\": \""
 				+ predictionResponse.getActualMessage() + "\n" + predictionResponse.getHours() + "\n" + "<<"
 				+ predictionResponse.getSource() + ">>" + "\"}," + "\"headings\": {\"en\": \""
