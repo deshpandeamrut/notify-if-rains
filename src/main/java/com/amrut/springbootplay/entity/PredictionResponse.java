@@ -8,7 +8,9 @@ public class PredictionResponse {
 	
 	private String actualMessage;
 	
+	private String hours;
 	
+	private String precProbab;
 
 	public String getActualMessage() {
 		return actualMessage;
@@ -36,6 +38,23 @@ public class PredictionResponse {
 
 	
 	
+	public String getHours() {
+		return hours;
+	}
+
+	public void setHours(String string) {
+		this.hours = string;
+	}
+
+	
+	public String getPrecProbab() {
+		return precProbab;
+	}
+
+	public void setPrecProbab(String precProbab) {
+		this.precProbab = precProbab;
+	}
+
 	public PredictionResponse() {
 		super();
 		this.message = "NA";

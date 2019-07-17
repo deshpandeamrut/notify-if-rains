@@ -3,6 +3,11 @@ package com.amrut.springbootplay.service;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +18,7 @@ import com.amrut.springbootplay.entity.AccuWeatherForecasts;
 import com.amrut.springbootplay.entity.AccuWeatherHeadline;
 import com.amrut.springbootplay.entity.AccuWeatherResponse;
 import com.amrut.springbootplay.entity.CurrentForecast;
+import com.amrut.springbootplay.entity.DarkySkyApiHourly;
 import com.amrut.springbootplay.entity.DarkySkyApiResponse;
 import com.amrut.springbootplay.entity.DarkySkyApiWeek;
 import com.amrut.springbootplay.entity.PredictionResponse;
@@ -85,6 +91,55 @@ public class WeatherServiceImpl {
 		return raining;
 	}
 
+	private void getRainTiming(DarkySkyApiResponse darkySkyApiResponse, PredictionResponse predictionResponse) {
+		List<DarkySkyApiHourly> hourlyData = darkySkyApiResponse.getDarkySkyApiHourly().getHourlyData();
+		Collections.sort(hourlyData, new Comparator<DarkySkyApiHourly>() {
+			@Override
+			public int compare(DarkySkyApiHourly o1, DarkySkyApiHourly o2) {
+				return o2.getPrecipProbability().compareTo(o1.getPrecipProbability());
+			}
+		});
+		String s = "";
+		boolean mAlertRaised = false;
+		boolean eAlertRaised = false;
+		for (int i = 0; i < 3; i++) {
+			String precProbab = hourlyData.get(i).getPrecipProbability();
+			long hourTimestamp = Long.parseLong(hourlyData.get(i).getTime());
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(hourTimestamp * 1000);
+			int am_pm = cal.get(Calendar.AM_PM);
+			String ampm = "ampm";
+			if (am_pm == 0) {
+				ampm = "AM";
+			} else {
+				ampm = "PM";
+			}
+			String startHour = cal.get(Calendar.HOUR) + ampm + ":" + precProbab;
+			if (!mAlertRaised && cal.get(Calendar.HOUR_OF_DAY) > 9 && cal.get(Calendar.HOUR_OF_DAY) < 11) {
+				predictionResponse.setMessage(predictionResponse.getMessage() + " | Affects Morning Commute");
+				mAlertRaised= true;
+			}
+			if (!eAlertRaised && cal.get(Calendar.HOUR_OF_DAY) > 18 && cal.get(Calendar.HOUR_OF_DAY) < 22) {
+				predictionResponse.setMessage(predictionResponse.getMessage() + " | Affects Evening Commute");
+				eAlertRaised = true;
+			}
+			s = s + startHour;
+			if (i != 2) {
+				s = s + ", ";
+			}
+		}
+		/*
+		 * for (int i = 1; i < hourlyData.size(); i++) { precProbab =
+		 * hourlyData.get(i).getTime(); hourTimestamp =
+		 * Long.parseLong(hourlyData.get(i).getTime()); cal = Calendar.getInstance();
+		 * cal.setTimeInMillis(hourTimestamp*1000); int nextHour =
+		 * cal.get(Calendar.HOUR_OF_DAY); if((startHour+1)==nextHour) { endHour =
+		 * nextHour; startHour = nextHour; }else { break; } } if(endHour!=-1)
+		 * predictionResponse.setHours(predictionResponse.getHours()+"-"+endHour);
+		 */
+		predictionResponse.setHours(s);
+	}
+
 	private String checkWhenItRains(AccuWeatherResponse accuWeatherResponse) {
 		AccuWeatherForecasts forecast = accuWeatherResponse.getForecasts().get(0);
 		String when = "";
@@ -140,6 +195,7 @@ public class WeatherServiceImpl {
 					.setActualMessage(darkySkyApiResponse.getDarkySkyApiDaily().getWeekData().get(0).getSummary());
 			if (predictionResponse.getSource().equals("")) {
 				predictionResponse.setSource("DARK SKY");
+				getRainTiming(darkySkyApiResponse, predictionResponse);
 			} else {
 				predictionResponse.setSource("ALL SOURCES");
 			}
@@ -155,8 +211,9 @@ public class WeatherServiceImpl {
 
 		String strJsonBody = "{" + "\"app_id\": \"" + oneSignalAppId + "\"," + "\"included_segments\": [\"All\"],"
 				+ "\"data\": {\"headings\": \"bar\"}," + "\"contents\": {\"en\": \""
-				+ predictionResponse.getActualMessage() + "\n" + "<<" + predictionResponse.getSource() + ">>" + "\"},"
-				+ "\"headings\": {\"en\": \"" + predictionResponse.getMessage() + "\"}" + "}";
+				+ predictionResponse.getActualMessage() + "\n" + predictionResponse.getHours() + "\n" + "<<"
+				+ predictionResponse.getSource() + ">>" + "\"}," + "\"headings\": {\"en\": \""
+				+ predictionResponse.getMessage() + "\"}" + "}";
 
 		return pushNotification(strJsonBody);
 	}

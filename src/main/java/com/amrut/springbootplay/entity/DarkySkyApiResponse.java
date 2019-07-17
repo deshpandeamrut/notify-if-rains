@@ -13,7 +13,7 @@ public class DarkySkyApiResponse {
 	private DarkySkyApiCurrently darkySkyApiCurrently;
 
 	@JsonProperty("hourly")
-	private DarkySkyApiHourly darkySkyApiHourly;
+	private DarkySkyApiHourlyOverview darkySkyApiHourly;
 	
 	public DarkySkyApiDaily getDarkySkyApiDaily() {
 		return darkySkyApiDaily;
@@ -31,11 +31,11 @@ public class DarkySkyApiResponse {
 		this.darkySkyApiCurrently = darkySkyApiCurrently;
 	}
 
-	public DarkySkyApiHourly getDarkySkyApiHourly() {
+	public DarkySkyApiHourlyOverview getDarkySkyApiHourly() {
 		return darkySkyApiHourly;
 	}
 
-	public void setDarkySkyApiHourly(DarkySkyApiHourly darkySkyApiHourly) {
+	public void setDarkySkyApiHourly(DarkySkyApiHourlyOverview darkySkyApiHourly) {
 		this.darkySkyApiHourly = darkySkyApiHourly;
 	}
 }
