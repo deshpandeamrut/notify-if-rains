@@ -1,8 +1,10 @@
 package com.amrut.springbootplay.service;
 
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -84,7 +86,7 @@ public class WeatherServiceImpl {
 		boolean raining = false;
 		AccuWeatherHeadline headline = accuWeatherResponse.getHeadline();
 		if (headline != null) {
-			if (headline.getText() != null && headline.getText().toLowerCase().contains("rain")) {
+			if (headline.getText() != null && headline.getText().toLowerCase().contains("rain") || headline.getText().toLowerCase().contains("storm")) {
 				raining = true;
 			}
 		}
@@ -144,10 +146,10 @@ public class WeatherServiceImpl {
 		AccuWeatherForecasts forecast = accuWeatherResponse.getForecasts().get(0);
 		String when = "";
 		if (forecast != null) {
-			if (forecast.getDay() != null && forecast.getDay().getPhrase().toLowerCase().contains("rain")) {
+			if (forecast.getDay() != null && forecast.getDay().getPhrase().toLowerCase().contains("rain") || forecast.getDay().getPhrase().toLowerCase().contains("storm")) {
 				when = "day";
 			}
-			if (forecast.getNight() != null && forecast.getNight().getPhrase().toLowerCase().contains("rain")) {
+			if (forecast.getNight() != null && forecast.getNight().getPhrase().toLowerCase().contains("rain") || forecast.getNight().getPhrase().toLowerCase().contains("storm")) {
 				if (when.equalsIgnoreCase("day")) {
 					when = "both";
 				} else {
@@ -163,7 +165,7 @@ public class WeatherServiceImpl {
 		boolean raining = false;
 		String summary = todaysData.getSummary();
 		if (summary != null) {
-			if (summary.toLowerCase().contains("rain")) {
+			if (summary.toLowerCase().contains("rain") || summary.toLowerCase().contains("drizzl") || summary.toLowerCase().contains("storm")) {
 				raining = true;
 			}
 		}
